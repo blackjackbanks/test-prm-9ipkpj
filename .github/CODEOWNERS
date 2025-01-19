@@ -1,0 +1,49 @@
+* @core-maintainers
+
+# Backend service code requires both backend and security team review
+src/backend/ @backend-team @security-team
+
+# Frontend web application code owned by frontend team
+src/web/ @frontend-team
+
+# Infrastructure and deployment configuration requires devops and security review
+infrastructure/ @devops-team @security-team
+
+# CI/CD workflow configurations owned by devops team
+.github/workflows/ @devops-team
+
+# Security-specific code owned by security team
+src/backend/src/security/ @security-team
+
+# Contextual engine code requires both AI and backend team review
+src/backend/src/contextual_engine/ @ai-team @backend-team
+
+# Integration hub code requires both integration and backend team review
+src/backend/src/integration_hub/ @integration-team @backend-team
+
+# Package and dependency files require security review
+package.json @security-team @devops-team
+package-lock.json @security-team @devops-team
+requirements.txt @security-team @devops-team
+go.mod @security-team @devops-team
+go.sum @security-team @devops-team
+
+# Configuration files require devops review
+*.yaml @devops-team
+*.yml @devops-team
+*.json @devops-team
+*.toml @devops-team
+
+# Documentation changes require tech writer review
+docs/ @tech-writers @core-maintainers
+*.md @tech-writers @core-maintainers
+
+# Test files require respective team reviews
+src/backend/tests/ @backend-team @qa-team
+src/web/tests/ @frontend-team @qa-team
+
+# Database migrations require DBA review
+src/backend/migrations/ @dba-team @backend-team
+
+# API specifications require API team review
+api/ @api-team @backend-team
