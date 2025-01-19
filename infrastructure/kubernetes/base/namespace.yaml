@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: coreos
+  labels:
+    # Core application labels
+    app.kubernetes.io/name: coreos
+    app.kubernetes.io/part-of: coreos-platform
+    app.kubernetes.io/managed-by: terraform
+    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/component: platform
+    
+    # Service mesh and security controls
+    istio-injection: enabled
+    security.istio.io/tlsMode: strict
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    
+    # Operational labels
+    goldilocks.fairwinds.com/enabled: "true"
+    cost-center: platform-infrastructure
+    environment: production
+
+  annotations:
+    # Service mesh configuration
+    linkerd.io/inject: enabled
+    network-policy: strict
+    
+    # Backup configuration
+    backup.velero.io/backup-volumes: "true"
+    
+    # Release management
+    meta.helm.sh/release-name: coreos
+    meta.helm.sh/release-namespace: coreos
+    
+    # Security and compliance
+    compliance.security.coreos.io/pci-dss: enabled
+    compliance.security.coreos.io/soc2: enabled
+    
+    # Observability configuration
+    monitoring.coreos.io/alerts: enabled
+    logging.coreos.io/index-pattern: coreos-*
+    
+    # Secrets management
+    vault.security.coreos.io/enabled: "true"
