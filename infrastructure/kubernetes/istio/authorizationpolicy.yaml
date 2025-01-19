@@ -1,0 +1,101 @@
+# Istio AuthorizationPolicy v1beta1 - COREos Platform
+# Version: 1.18+
+# Purpose: Zero-trust security model implementation with fine-grained RBAC
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: coreos-authz-policy
+  namespace: coreos
+  labels:
+    app: coreos
+    component: security
+    version: v1
+    istio.io/rev: "1.18"
+  annotations:
+    security.istio.io/tlsMode: "strict"
+    policy.istio.io/check: "true"
+    policy.istio.io/lang: "cue"
+spec:
+  selector:
+    matchLabels:
+      app: coreos
+      security.istio.io/tlsMode: strict
+  
+  rules:
+    # API and WebSocket endpoints authorization
+    - from:
+        - source:
+            # Service account-based authentication
+            principals: ["cluster.local/ns/coreos/sa/coreos-sa"]
+            namespaces: ["coreos"]
+            # IP-based restrictions (optional)
+            ipBlocks: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+      to:
+        - operation:
+            # HTTP methods allowed
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+            # API paths
+            paths: 
+              - "/api/v1/*"
+              - "/ws/*"
+              - "/health"
+              - "/metrics"
+            ports: ["8080", "8443"]
+      when:
+        # JWT token validation
+        - key: request.auth.claims[iss]
+          values: ["https://auth.coreos.com"]
+        - key: request.auth.claims[aud]
+          values: ["coreos-platform"]
+        - key: request.auth.claims[scope]
+          values: ["api:access"]
+        - key: connection.sni
+          values: ["*.coreos.com"]
+        - key: connection.mtls.principal
+          values: ["*"]
+
+    # Frontend web interface authorization
+    - from:
+        - source:
+            principals: ["cluster.local/ns/coreos/sa/web-sa"]
+            namespaces: ["coreos"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/", "/static/*", "/assets/*"]
+            ports: ["80", "443"]
+      when:
+        - key: request.auth.claims[iss]
+          values: ["https://auth.coreos.com"]
+        - key: request.auth.claims[aud]
+          values: ["coreos-web"]
+
+    # Monitoring and health check endpoints
+    - from:
+        - source:
+            principals: ["cluster.local/ns/monitoring/sa/prometheus"]
+            namespaces: ["monitoring"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health"]
+            ports: ["9090"]
+
+    # Inter-service communication
+    - from:
+        - source:
+            principals: ["cluster.local/ns/coreos/*"]
+            namespaces: ["coreos"]
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE"]
+            paths: ["/internal/*"]
+            ports: ["9000"]
+      when:
+        - key: source.principal
+          values: ["cluster.local/ns/coreos/*"]
+        - key: connection.mtls.mode
+          values: ["STRICT"]
+
+  # Action if no rules match
+  action: DENY
