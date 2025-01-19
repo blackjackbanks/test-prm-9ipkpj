@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+  namespace: coreos
+  labels:
+    app: coreos-web
+    component: frontend
+    version: v1
+    part-of: coreos
+    managed-by: kubectl
+  annotations:
+    # Enable Prometheus metrics scraping
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+    # Istio service mesh annotations
+    service.istio.io/canonical-name: "web-service"
+    service.istio.io/canonical-revision: "v1"
+spec:
+  # Use ClusterIP for internal access, Istio will handle external exposure
+  type: ClusterIP
+  ports:
+    # Main HTTP port for web traffic
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+      appProtocol: http
+    # Metrics port for Prometheus scraping
+    - port: 9090
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+      appProtocol: http
+  # Pod selector for service endpoints
+  selector:
+    app: coreos-web
+    component: frontend
+  # Disable session affinity as handled by Istio
+  sessionAffinity: None
+  # Don't publish pods that aren't ready
+  publishNotReadyAddresses: false
+  # Use cluster-wide internal traffic policy
+  internalTrafficPolicy: Cluster
