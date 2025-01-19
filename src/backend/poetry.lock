@@ -1,0 +1,140 @@
+[[package]]
+name = "fastapi"
+version = "0.100.0"
+description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+files = [
+    {file = "fastapi-0.100.0-py3-none-any.whl", hash = "sha256:271662daf986da8fa98dc2b7c7f61c4abdfdccfb4786d79ed8b2878f172c6d5f"},
+    {file = "fastapi-0.100.0.tar.gz", hash = "sha256:271662daf986da8fa98dc2b7c7f61c4abdfdccfb4786d79ed8b2878f172c6d5f"}
+]
+
+[[package]]
+name = "uvicorn"
+version = "0.22.0"
+description = "The lightning-fast ASGI server"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+files = [
+    {file = "uvicorn-0.22.0-py3-none-any.whl", hash = "sha256:79277ae03db57ce7d9aa0567830bbb51d7a612f54d6e1e3e92da3ef24c2c8ed8"},
+    {file = "uvicorn-0.22.0.tar.gz", hash = "sha256:79277ae03db57ce7d9aa0567830bbb51d7a612f54d6e1e3e92da3ef24c2c8ed8"}
+]
+
+[package.extras]
+standard = ["websockets>=10.4", "httptools>=0.5.0", "watchfiles>=0.13", "python-dotenv>=0.13"]
+
+[[package]]
+name = "sqlalchemy"
+version = "2.0.0"
+description = "Database Abstraction Library"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+files = [
+    {file = "SQLAlchemy-2.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1a0754c2d9f0c7982bec0a31138e495ed1f6b8435d7e677c45be60ec18370acf"},
+    {file = "SQLAlchemy-2.0.0.tar.gz", hash = "sha256:1a0754c2d9f0c7982bec0a31138e495ed1f6b8435d7e677c45be60ec18370acf"}
+]
+
+[package.extras]
+asyncio = ["greenlet>=2.0.0"]
+
+[[package]]
+name = "alembic"
+version = "1.11.0"
+description = "A database migration tool for SQLAlchemy"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+files = [
+    {file = "alembic-1.11.0-py3-none-any.whl", hash = "sha256:2edcc97bed0bd3272611ce3a98d98279e9c209e7186e43e75bbb1b2bdfdbcc43"},
+    {file = "alembic-1.11.0.tar.gz", hash = "sha256:2edcc97bed0bd3272611ce3a98d98279e9c209e7186e43e75bbb1b2bdfdbcc43"}
+]
+
+[[package]]
+name = "pydantic"
+version = "2.0.0"
+description = "Data validation using Python type hints"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+files = [
+    {file = "pydantic-2.0.0-py3-none-any.whl", hash = "sha256:4988db08a49795dd4416d9f0f2e0dfbdb8e0d5c311f3d00e4e9ea319e34fe3d9"},
+    {file = "pydantic-2.0.0.tar.gz", hash = "sha256:4988db08a49795dd4416d9f0f2e0dfbdb8e0d5c311f3d00e4e9ea319e34fe3d9"}
+]
+
+[package.extras]
+email = ["email-validator>=2.0.0"]
+
+# Additional core dependencies...
+[[package]]
+name = "torch"
+version = "2.0.0"
+description = "PyTorch machine learning framework"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+
+[[package]]
+name = "transformers"
+version = "4.30.0"
+description = "State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+
+# Development dependencies...
+[[package]]
+name = "pytest"
+version = "7.4.0"
+description = "pytest: helps you write better programs"
+category = "dev"
+optional = false
+python-versions = ">=3.11"
+
+[[package]]
+name = "black"
+version = "23.3.0"
+description = "The uncompromising code formatter"
+category = "dev"
+optional = false
+python-versions = ">=3.11"
+
+[[package]]
+name = "mypy"
+version = "1.4.0"
+description = "Optional static typing for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.11"
+
+# Monitoring and logging...
+[[package]]
+name = "prometheus-client"
+version = "0.17.0"
+description = "Python client for the Prometheus monitoring system"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+
+[[package]]
+name = "sentry-sdk"
+version = "1.28.0"
+description = "Python client for Sentry"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+
+[package.extras]
+fastapi = ["fastapi>=0.79.0"]
+
+# Metadata section
+[metadata]
+lock-version = "2.0"
+python-versions = ">=3.11"
+content-hash = "sha256-hash-of-dependencies"
+files-hash = "sha256-hash-of-package-files"
+
+[metadata.files]
+# File hashes for all packages...
