@@ -1,0 +1,72 @@
+# HorizontalPodAutoscaler configuration for COREos web frontend
+# API version: autoscaling/v2 (Kubernetes 1.23+)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+metadata:
+  name: coreos-web-hpa
+  namespace: coreos
+  labels:
+    app: coreos-web
+    component: frontend
+    managed-by: kubernetes
+    part-of: coreos-platform
+  annotations:
+    description: "HPA for COREos web frontend"
+    monitoring.coreos.com/scrape: "true"
+    monitoring.coreos.com/port: "8080"
+
+spec:
+  # Target the web frontend deployment
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: coreos-web
+
+  # Replica bounds for high availability
+  minReplicas: 3
+  maxReplicas: 10
+
+  # Multi-metric scaling criteria
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+  # Advanced scaling behavior configuration
+  behavior:
+    # Scale up configuration
+    scaleUp:
+      # Wait 60s before scaling up to prevent thrashing
+      stabilizationWindowSeconds: 60
+      policies:
+        # Add up to 2 pods every 60 seconds
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+      # Use the most aggressive policy
+      selectPolicy: Max
+
+    # Scale down configuration
+    scaleDown:
+      # Wait 5 minutes before scaling down to prevent thrashing
+      stabilizationWindowSeconds: 300
+      policies:
+        # Remove 1 pod every 60 seconds
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      # Use the most conservative policy
+      selectPolicy: Min
