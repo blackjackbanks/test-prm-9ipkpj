@@ -1,0 +1,82 @@
+{
+  "compilerOptions": {
+    // ECMAScript Target & Features
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "useDefineForClassFields": true,
+    "jsx": "react-jsx",
+
+    // Module Resolution
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@services/*": ["src/services/*"],
+      "@store/*": ["src/store/*"],
+      "@styles/*": ["src/styles/*"],
+      "@utils/*": ["src/utils/*"],
+      "@types/*": ["src/types/*"],
+      "@constants/*": ["src/constants/*"],
+      "@assets/*": ["src/assets/*"],
+      "@contexts/*": ["src/contexts/*"],
+      "@layouts/*": ["src/layouts/*"],
+      "@features/*": ["src/features/*"],
+      "@api/*": ["src/api/*"],
+      "@config/*": ["src/config/*"]
+    },
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+
+    // Type Checking & JavaScript Support
+    "strict": true,
+    "allowJs": false,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+
+    // Additional Checks
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    // Project References
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+
+    // Source Maps
+    "sourceMap": true,
+    "inlineSources": true,
+    "inlineSourceMap": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vite.config.ts",
+    "jest.config.ts",
+    "src/**/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "build",
+    ".docker",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.stories.tsx"
+  ],
+  "references": []
+}
