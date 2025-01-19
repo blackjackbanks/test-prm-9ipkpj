@@ -1,0 +1,72 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: coreos-tls-cert
+  namespace: coreos
+  labels:
+    app: coreos
+    component: certificate
+    managed-by: cert-manager
+    security-tier: frontend
+    encryption: enabled
+  annotations:
+    cert-manager.io/issue-temporary-certificate: "true"
+    cert-manager.io/common-name: "${DOMAIN_NAME}"
+    monitoring.coreos.com/alert-threshold: "15d"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9402"
+    backup.velero.io/backup-volumes: "true"
+    security.coreos.io/tls-version: "TLSv1.3"
+    security.coreos.io/last-renewal: "timestamp"
+
+spec:
+  # Secret name where the certificate will be stored
+  secretName: coreos-tls-cert
+  
+  # Certificate validity duration (90 days)
+  duration: "2160h"
+  
+  # Renewal buffer (15 days before expiry)
+  renewBefore: "360h"
+  
+  # Certificate subject information
+  subject:
+    organizations:
+      - COREos
+  
+  # Private key configuration
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+    rotationPolicy: Always
+  
+  # Certificate usages
+  usages:
+    - server auth
+    - client auth
+  
+  # DNS names for the certificate
+  dnsNames:
+    - "${DOMAIN_NAME}"
+    - "api.${DOMAIN_NAME}"
+    - "*.${DOMAIN_NAME}"
+  
+  # Certificate issuer reference
+  issuerRef:
+    name: letsencrypt-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+  
+  # Additional security configurations
+  keystores:
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        name: coreos-secrets
+        key: tls.keystore.password
+  
+  # Certificate revocation settings
+  revocation:
+    enabled: true
+    reason: "superseded"
