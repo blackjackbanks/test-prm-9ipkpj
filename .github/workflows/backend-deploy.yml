@@ -1,0 +1,195 @@
+name: Backend Deployment
+
+on:
+  workflow_run:
+    workflows: ["Backend CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Deployment environment'
+        options: ['staging', 'production']
+        required: true
+      version:
+        type: string
+        description: 'Application version to deploy'
+        required: true
+      ml_model_version:
+        type: string
+        description: 'ML model version to deploy'
+        required: true
+
+env:
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  AWS_REGION: us-west-2
+  AZURE_REGION: eastus
+  IMAGE_NAME: coreos-backend
+
+concurrency:
+  group: deploy-${{ inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment || 'staging' }}
+      url: ${{ steps.deploy.outputs.environment_url }}
+    
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Verify CI workflow status
+        if: ${{ github.event.workflow_run }}
+        run: |
+          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "CI workflow failed. Deployment blocked."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version || github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            ML_MODEL_VERSION=${{ inputs.ml_model_version || 'latest' }}
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          platforms: linux/amd64
+          target: runtime
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ inputs.version || github.sha }}
+            ml.coreos.model-version=${{ inputs.ml_model_version || 'latest' }}
+
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version || github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: Update Kubernetes manifests
+        run: |
+          # Update image version in deployment
+          sed -i "s|image:.*|image: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version || github.sha }}|g" \
+            infrastructure/kubernetes/backend/deployment.yaml
+
+      - name: Deploy to AWS EKS
+        run: |
+          aws eks update-kubeconfig --name coreos-cluster --region ${{ env.AWS_REGION }}
+          
+          # Apply canary deployment
+          kubectl -n coreos apply -f infrastructure/kubernetes/base/namespace.yaml
+          kubectl -n coreos apply -f infrastructure/kubernetes/backend/deployment.yaml
+          
+          # Monitor deployment health
+          kubectl -n coreos rollout status deployment/coreos-backend --timeout=10m
+
+      - name: Deploy to Azure AKS
+        run: |
+          az aks get-credentials --resource-group coreos-rg --name coreos-cluster
+          
+          # Apply deployment to secondary region
+          kubectl -n coreos apply -f infrastructure/kubernetes/backend/deployment.yaml
+          
+          # Monitor deployment health
+          kubectl -n coreos rollout status deployment/coreos-backend --timeout=10m
+
+      - name: Verify deployment health
+        id: health_check
+        run: |
+          # Check deployment metrics
+          ERRORS=$(kubectl -n coreos get deploy coreos-backend -o json | \
+            jq '.status.conditions[] | select(.type=="Available") | .status')
+          
+          if [[ "$ERRORS" != "True" ]]; then
+            echo "Deployment health check failed"
+            exit 1
+          fi
+
+      - name: Set deployment outputs
+        id: deploy
+        run: |
+          echo "environment_url=https://api.${{ inputs.environment || 'staging' }}.coreos.dev" >> $GITHUB_OUTPUT
+          echo "deployment_status=success" >> $GITHUB_OUTPUT
+
+  rollback:
+    needs: [deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Rollback EKS deployment
+        run: |
+          aws eks update-kubeconfig --name coreos-cluster --region ${{ env.AWS_REGION }}
+          kubectl -n coreos rollout undo deployment/coreos-backend
+          kubectl -n coreos rollout status deployment/coreos-backend --timeout=5m
+
+      - name: Configure Azure credentials
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Rollback AKS deployment
+        run: |
+          az aks get-credentials --resource-group coreos-rg --name coreos-cluster
+          kubectl -n coreos rollout undo deployment/coreos-backend
+          kubectl -n coreos rollout status deployment/coreos-backend --timeout=5m
+
+      - name: Notify rollback status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Deployment Rollback Executed',
+              body: `Deployment to ${process.env.ENVIRONMENT} failed and was rolled back.\n\nCommit: ${context.sha}\nWorkflow: ${context.workflow}\nRun: ${context.runId}`
+            });
