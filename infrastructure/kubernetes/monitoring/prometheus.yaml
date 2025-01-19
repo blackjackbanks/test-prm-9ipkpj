@@ -1,0 +1,128 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: coreos-prometheus
+  namespace: coreos
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: coreos-platform
+    app.kubernetes.io/managed-by: terraform
+  annotations:
+    security.coreos.com/tls-enabled: "true"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+
+spec:
+  # High availability configuration with 2 replicas
+  replicas: ${PROMETHEUS_REPLICAS}
+  version: v2.45.0
+  serviceAccountName: prometheus
+
+  # Pod metadata configuration
+  podMetadata:
+    annotations:
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+  # Service monitor selector for COREos platform components
+  serviceMonitorSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: coreos-platform
+
+  # High availability pod anti-affinity rules
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - topologyKey: kubernetes.io/hostname
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: prometheus
+
+  # Resource allocation for production workloads
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+
+  # Persistent storage configuration
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: premium-rwo
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: ${PROMETHEUS_STORAGE_SIZE}
+
+  # Data retention configuration
+  retention: ${PROMETHEUS_RETENTION_DAYS}d
+  retentionSize: 45GB
+
+  # Enhanced security context
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Alerting configuration with TLS
+  alerting:
+    alertmanagers:
+    - name: alertmanager-main
+      namespace: coreos
+      port: web
+      scheme: https
+      tlsConfig:
+        caFile: /etc/prometheus/secrets/alertmanager-tls/ca.crt
+        certFile: /etc/prometheus/secrets/alertmanager-tls/tls.crt
+        keyFile: /etc/prometheus/secrets/alertmanager-tls/tls.key
+
+  # Alert rules configuration
+  ruleSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: coreos-platform
+      role: alert-rules
+
+  # Additional security configurations
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Web configuration with TLS
+  web:
+    tlsConfig:
+      cert:
+        secret:
+          name: prometheus-tls
+          key: tls.crt
+      key:
+        secret:
+          name: prometheus-tls
+          key: tls.key
+
+  # Additional configurations for production readiness
+  evaluationInterval: 30s
+  scrapeInterval: 30s
+  enableAdminAPI: false
+  enableFeatures:
+  - exemplar-storage
+  - remote-write-receiver
+  
+  # Remote write configuration for long-term storage
+  remoteWrite:
+  - url: "http://thanos-receive:19291/api/v1/receive"
+    writeRelabelConfigs:
+    - sourceLabels: [__name__]
+      regex: up|prometheus_.*
+      action: keep
+
+  # Additional security measures
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: prometheus-additional.yaml
