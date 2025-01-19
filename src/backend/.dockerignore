@@ -1,0 +1,48 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pip_cache/
+.mypy_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# Build and distribution
+dist/
+build/
+*.egg-info/
+
+# Environment and secrets
+.env
+.env.*
+
+# Version control
+.git/
+.gitignore
+
+# IDE settings
+.vscode/
+.idea/
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# Documentation
+*.md
+LICENSE
+
+# Docker files
+docker-compose*.yml
+
+# Logs and temp files
+*.log
+*.swp
+.DS_Store
+*~
+*.bak
