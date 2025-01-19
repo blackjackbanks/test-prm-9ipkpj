@@ -1,0 +1,128 @@
+version: "3.9"
+
+services:
+  # Development service
+  web:
+    image: coreos-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        NODE_VERSION: "18-alpine"
+        BUILD_MODE: "development"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - npm-cache:/root/.npm
+    environment:
+      - NODE_ENV=development
+      - VITE_APP_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000/ws
+      - VITE_API_VERSION=v1
+      - VITE_APP_NAME=COREos
+      - VITE_LOG_LEVEL=debug
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    networks:
+      - coreos_network
+
+  # Production-like service
+  web_prod:
+    image: coreos-web-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        NGINX_VERSION: "1.25-alpine"
+        BUILD_MODE: "production"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx-cache:/var/cache/nginx:delegated
+      - nginx-pid:/var/run
+      - ssl-certs:/etc/nginx/ssl:ro
+    environment:
+      - NODE_ENV=production
+      - NGINX_PORT=80
+      - NGINX_HTTPS_PORT=443
+      - NGINX_WORKER_PROCESSES=auto
+      - NGINX_WORKER_CONNECTIONS=1024
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    read_only: true
+    networks:
+      - coreos_network
+
+volumes:
+  nginx-cache:
+    driver: local
+  nginx-pid:
+    driver: local
+  npm-cache:
+    driver: local
+  ssl-certs:
+    driver: local
+
+networks:
+  coreos_network:
+    driver: bridge
+    enable_ipv6: true
+    driver_opts:
+      com.docker.network.bridge.name: coreos_net
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+        - subnet: 2001:db8::/64
+
+x-development:
+  web:
+    command: npm run dev
+    environment:
+      - VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
+      - VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+      - VITE_MICROSOFT_CLIENT_ID=${VITE_MICROSOFT_CLIENT_ID}
+      - VITE_APPLE_CLIENT_ID=${VITE_APPLE_CLIENT_ID}
+      - VITE_ENABLE_DEBUG=true
+      - VITE_MOCK_API=true
+      - VITE_HOT_RELOAD=true
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - npm-cache:/root/.npm
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
