@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: coreos-gateway
+  namespace: coreos
+  labels:
+    app: coreos
+    component: ingress
+    version: v1
+    managed-by: istio
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "15020"
+    monitoring.coreos.com/alert: "true"
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    # HTTPS Server Configuration
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - ${DOMAIN_NAME}
+      tls:
+        mode: SIMPLE
+        credentialName: coreos-tls-cert
+        minProtocolVersion: TLSV1_3
+        cipherSuites:
+          - ECDHE-ECDSA-AES256-GCM-SHA384
+          - ECDHE-RSA-AES256-GCM-SHA384
+    
+    # HTTP Server Configuration (with HTTPS redirect)
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - ${DOMAIN_NAME}
+      tls:
+        httpsRedirect: true
