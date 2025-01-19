@@ -1,0 +1,136 @@
+# Jaeger Operator Custom Resource for COREos Platform
+# Version: jaegertracing.io/v1
+# Image: jaegertracing/jaeger-operator:1.45.0
+
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: coreos-jaeger
+  namespace: coreos # Referenced from namespace.yaml
+  labels:
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/part-of: coreos-platform
+    app.kubernetes.io/managed-by: terraform
+
+spec:
+  # Production deployment strategy for high availability
+  strategy: production
+
+  # Storage configuration using Elasticsearch
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        server-urls: http://elasticsearch:9200
+        index-prefix: coreos-jaeger
+        tls:
+          enabled: true
+          skip-host-verify: false
+      size: 20Gi
+      retention: 7d
+
+  # Ingress configuration with Istio and TLS
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: istio
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+  # Query service configuration with HA
+  query:
+    replicas: 2
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+  # Collector configuration with autoscaling
+  collector:
+    replicas: 2
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+
+  # Agent configuration as DaemonSet
+  agent:
+    strategy: DaemonSet
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  # Prometheus metrics integration
+  metrics:
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        labels:
+          app.kubernetes.io/part-of: coreos-platform
+
+  # Additional sampling and tracing configurations
+  sampling:
+    type: probabilistic
+    param: 1
+  
+  # UI configurations
+  ui:
+    options:
+      dependencies:
+        menuEnabled: true
+      tracking:
+        gaID: UA-000000-2
+      menu:
+        - label: "About COREos"
+          items:
+            - label: "Documentation"
+              url: "https://docs.coreos.com"
+
+  # Security configurations
+  security:
+    oauth:
+      enabled: true
+      clientId: jaeger-ui
+      clientSecret: ${JAEGER_OAUTH_SECRET}
+    
+  # Additional annotations for all pods
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "16686"
+    sidecar.istio.io/inject: "true"
+
+  # Volume mounts for certificates and configurations
+  volumes:
+    - name: jaeger-certs
+      secret:
+        secretName: jaeger-tls
+    - name: jaeger-config
+      configMap:
+        name: jaeger-config
+
+  # Affinity rules for high availability
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - jaeger
+          topologyKey: kubernetes.io/hostname
