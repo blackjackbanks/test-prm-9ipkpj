@@ -1,0 +1,22 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: coreos-backend-pdb
+  namespace: coreos
+  labels:
+    app.kubernetes.io/name: coreos-backend
+    app.kubernetes.io/part-of: coreos-platform
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/managed-by: terraform
+  annotations:
+    kubernetes.io/description: "PodDisruptionBudget for COREos backend service ensuring 75% minimum availability during voluntary disruptions"
+
+spec:
+  # Maintain 75% minimum availability during voluntary disruptions
+  # This aligns with the 99.9% uptime SLA requirement while allowing for maintenance
+  minAvailable: "75%"
+  
+  # Target the backend deployment pods using the same selector
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: coreos-backend
