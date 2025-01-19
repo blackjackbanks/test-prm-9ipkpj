@@ -1,0 +1,86 @@
+MIT License with AI/ML and Data Privacy Extensions
+
+Copyright (c) 2024 COREos
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+AI/ML MODEL TERMS:
+The Software includes artificial intelligence and machine learning components 
+("AI Components") powered by Llama models. Use of these AI Components is subject 
+to the following additional terms:
+
+1. Model Usage: The Llama model implementations included in this Software may be 
+   used for commercial and non-commercial purposes in accordance with the Llama 
+   Model License.
+
+2. Training Data: Any data used to train or fine-tune the AI Components must 
+   comply with applicable data protection laws and respect intellectual property 
+   rights.
+
+3. Output Attribution: When using AI Components, appropriate attribution must be 
+   provided indicating the use of Llama models.
+
+4. Ethical Use: Users shall not use the AI Components for purposes that:
+   - Promote discrimination or harm
+   - Generate misleading or deceptive content
+   - Violate applicable AI ethics guidelines
+
+DATA PRIVACY TERMS:
+The Software processes various types of data subject to privacy regulations. 
+Users must comply with the following data privacy requirements:
+
+1. Data Collection: Only collect personal data that is necessary and with proper 
+   legal basis as required by GDPR, CCPA, and other applicable regulations.
+
+2. Data Processing: 
+   - Implement appropriate security measures
+   - Process data only for specified purposes
+   - Maintain records of processing activities
+   - Honor data subject rights
+
+3. Data Storage:
+   - Store data in approved jurisdictions
+   - Implement retention policies
+   - Ensure secure deletion
+
+4. Data Transfers:
+   - Comply with cross-border transfer requirements
+   - Use approved transfer mechanisms
+   - Maintain transfer impact assessments
+
+INTEGRATION TERMS:
+When integrating the Software with external services:
+
+1. API Usage:
+   - Comply with third-party API terms of service
+   - Maintain secure API credentials
+   - Respect rate limits and fair usage policies
+
+2. Data Exchange:
+   - Encrypt data in transit
+   - Validate data integrity
+   - Document data flows
+
+3. Service Level Agreements:
+   - Monitor integration performance
+   - Implement error handling
+   - Maintain availability metrics
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+For questions about this license or to report violations, contact:
+legal@coreos.ai
