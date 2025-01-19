@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coreos-config
+  namespace: coreos
+  labels:
+    app: coreos
+    component: config
+    version: v1
+  annotations:
+    description: "Base configuration for COREos application components"
+    lastUpdated: "2024-01-20"
+data:
+  # Environment and API Configuration
+  ENV_STATE: "production"
+  API_VERSION: "v1"
+  PROJECT_NAME: "COREos"
+  VERSION: "1.0.0"
+  DEBUG: "false"
+
+  # Logging Configuration
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+
+  # Security and Access Control
+  CORS_ORIGINS: "*"
+
+  # Database Connection Pool Settings
+  DATABASE_POOL_SIZE: "20"
+  DATABASE_MAX_OVERFLOW: "10"
+  DATABASE_POOL_TIMEOUT: "30"
+
+  # Cache Configuration
+  CACHE_TTL: "3600"
+
+  # Rate Limiting Settings
+  RATE_LIMIT_DEFAULT: "1000"
+  RATE_LIMIT_BURST: "5000"
+
+  # Observability Configuration
+  METRICS_ENABLED: "true"
+  METRICS_INTERVAL: "15"
+  TRACING_ENABLED: "true"
+  TRACING_SAMPLE_RATE: "0.1"
+
+  # AI Model Configuration
+  AI_MODEL_TIMEOUT: "3000"
+  AI_MODEL_MAX_TOKENS: "2048"
+  AI_MODEL_TEMPERATURE: "0.7"
+
+  # Integration Settings
+  INTEGRATION_SYNC_INTERVAL: "300"
+  INTEGRATION_RETRY_ATTEMPTS: "3"
+  INTEGRATION_TIMEOUT: "60"
+
+  # Template Management
+  TEMPLATE_CACHE_TTL: "1800"
+  TEMPLATE_VERSION_LIMIT: "5"
+
+  # System Health and Lifecycle
+  HEALTH_CHECK_INTERVAL: "30"
+  GRACEFUL_SHUTDOWN_TIMEOUT: "30"
