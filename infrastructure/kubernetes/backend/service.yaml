@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: coreos
+  labels:
+    app.kubernetes.io/name: coreos-backend
+    app.kubernetes.io/part-of: coreos-platform
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/managed-by: terraform
+    app.kubernetes.io/version: 1.0.0
+    istio.io/rev: 1-18
+    security.istio.io/tlsMode: istio
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+    istio.io/protocol: "http,tcp"
+    topology.istio.io/network: "network1"
+    sidecar.istio.io/inject: "true"
+    monitoring.coreos.com/alert-threshold: "p99_latency=3s"
+    monitoring.coreos.com/uptime-slo: "99.9"
+
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+      appProtocol: http
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+      appProtocol: http
+  selector:
+    app.kubernetes.io/name: coreos-backend
+  sessionAffinity: None
+  publishNotReadyAddresses: false
+  topologyKeys:
+    - kubernetes.io/hostname
+    - topology.kubernetes.io/zone
+    - "*"
