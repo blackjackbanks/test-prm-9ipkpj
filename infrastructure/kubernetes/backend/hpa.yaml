@@ -1,0 +1,58 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: coreos-backend-hpa
+  namespace: coreos
+  labels:
+    app.kubernetes.io/name: coreos-backend
+    app.kubernetes.io/part-of: coreos-platform
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/managed-by: terraform
+  annotations:
+    kubernetes.io/description: "HorizontalPodAutoscaler for COREos backend service"
+    metric-config.pods.memory.targetAverageValue: "1Gi"
+    monitoring.coreos.com/scrape: "true"
+    monitoring.coreos.com/path: "/metrics"
+    scaling.policy.stabilization: "Configured with 60s scale-up and 300s scale-down windows"
+    autoscaling.policy/description: "Optimized for 99.9% uptime with <3s response time"
+    autoscaling.coreos.com/target-deployment: "coreos-backend"
+
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: coreos-backend
+
+  minReplicas: 3
+  maxReplicas: 10
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+      selectPolicy: Max
+
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Max
