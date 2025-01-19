@@ -1,0 +1,31 @@
+<svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="currentColor" 
+  stroke-width="1.5" 
+  stroke-linecap="round" 
+  stroke-linejoin="round"
+  role="img"
+  aria-label="Integrations icon"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Main connection hub circle -->
+  <circle cx="12" cy="12" r="3" />
+  
+  <!-- Connection points -->
+  <circle cx="5" cy="5" r="2" />
+  <circle cx="19" cy="5" r="2" />
+  <circle cx="5" cy="19" r="2" />
+  <circle cx="19" cy="19" r="2" />
+  
+  <!-- Connection lines -->
+  <path d="M8.7 8.7L10.5 10.5" />
+  <path d="M13.5 10.5L15.3 8.7" />
+  <path d="M8.7 15.3L10.5 13.5" />
+  <path d="M13.5 13.5L15.3 15.3" />
+  
+  <!-- Outer connection ring -->
+  <path d="M7 5h10M5 7v10M19 7v10M7 19h10" stroke-dasharray="2 2" />
+</svg>
