@@ -1,0 +1,33 @@
+# PodDisruptionBudget for COREos web frontend
+# Version: policy/v1
+# Purpose: Ensures high availability during voluntary disruptions by maintaining minimum pod count
+# Maintains 70% pod availability during maintenance operations and zone failures
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: coreos-web-pdb
+  namespace: coreos
+  labels:
+    app: coreos-web
+    component: frontend
+    tier: web
+    managed-by: kubernetes
+    environment: ${ENV}
+  annotations:
+    description: "PDB for COREos web frontend ensuring high availability"
+    maintenance-window: "daily-maintenance-window"
+    monitoring.coreos.com/alert: "true"
+    kubernetes.io/pdb-controller: "true"
+    kubernetes.io/last-applied-configuration: ""
+
+spec:
+  # Ensures 70% of pods remain available during voluntary disruptions
+  # This aligns with the high availability requirements while allowing for maintenance
+  minAvailable: "70%"
+  
+  # Selector matches the frontend deployment pods
+  selector:
+    matchLabels:
+      app: coreos-web
+      component: frontend
