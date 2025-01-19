@@ -1,0 +1,181 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.cache/
+.next/
+out/
+.nuxt/
+.output/
+
+# Environment and Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*credential*
+*secret*
+*password*
+*token*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# Testing and Coverage
+.coverage
+coverage/
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.coveragerc
+junit.xml
+
+# Docker
+.docker/
+*.log
+docker-compose.override.yml
+
+# Terraform and Infrastructure
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example.tfvars
+.terraformrc
+terraform.rc
+
+# Build and Dependencies
+.gradle/
+target/
+vendor/
+
+# Temporary and Cache
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.cache
+.eslintcache
+.stylelintcache
+
+# Local Development
+local.*
+*.local
+local/
+.local/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Security
+*.[jJ][sS][oO][nN].[kK][eE][yY]
+*.[pP][eE][mM]
+*.[kK][eE][yY]
+*.[cC][eE][rR][tT]
+*.[pP][fF][xX]
+*.[pP]12
+*.[sS][sS][hH]
+
+# Additional Security Patterns
+*.[aA][uU][tT][hH]
+*.[cC][oO][nN][fF][iI][gG]
+*.[sS][eE][cC][rR][eE][tT][sS]
+*.[pP][aA][sS][sS][wW][oO][rR][dD][sS]
+*.[kK][eE][yY][sS][tT][oO][rR][eE]
+*.[tT][rR][uU][sS][tT][sS][tT][oO][rR][eE]
+
+# AI/ML
+.models/
+*.onnx
+*.pt
+*.pth
+*.h5
+*.tflite
+*.pb
+model_weights/
+checkpoints/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.bak.sql
+dump.rdb
+
+# Kubernetes
+*.kubeconfig
+kube*.yml
+!kube.example.yml
+
+# Package Managers
+yarn.lock
+package-lock.json
+poetry.lock
+Pipfile.lock
+
+# Generated Documentation
+docs/_build/
+site/
+_site/
+.docusaurus/
+.vuepress/dist/
+
+# Misc Development Files
+.env.development
+.env.test
+.env.production
+.env.local
+.env.*.local
+!.env.example
+!.env.*.example
