@@ -1,0 +1,100 @@
+# Istio DestinationRule v1beta1 - COREos Traffic Policy Configuration
+# Version: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: coreos-destinationrule
+  namespace: coreos
+  labels:
+    app: coreos
+    component: traffic-policy
+    version: v1
+    environment: prod
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "15020"
+    sidecar.istio.io/inject: "true"
+
+spec:
+  # Primary backend service host
+  host: backend-service
+
+  # Global traffic policy configuration
+  trafficPolicy:
+    # Load balancing configuration
+    loadBalancer:
+      simple: ROUND_ROBIN
+      consistentHash:
+        httpCookie:
+          name: route-cookie
+          ttl: 3600s
+
+    # Connection pool settings for circuit breaking
+    connectionPool:
+      tcp:
+        maxConnections: 1000
+        connectTimeout: 3s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+      http:
+        http1MaxPendingRequests: 1000
+        maxRequestsPerConnection: 100
+        maxRetries: 3
+        idleTimeout: 15s
+        h2MaxRequests: 1000
+
+    # Outlier detection for circuit breaking
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 40
+
+    # mTLS configuration
+    tls:
+      mode: ISTIO_MUTUAL
+      clientCertificate: /etc/certs/cert-chain.pem
+      privateKey: /etc/certs/key.pem
+      caCertificates: /etc/certs/root-cert.pem
+      subjectAltNames:
+        - backend-service.coreos.svc.cluster.local
+
+  # Service subsets for versioning and canary deployments
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_CONN
+        connectionPool:
+          tcp:
+            maxConnections: 500
+          http:
+            maxRequestsPerConnection: 50
+    
+    - name: v2
+      labels:
+        version: v2
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_CONN
+        connectionPool:
+          tcp:
+            maxConnections: 500
+          http:
+            maxRequestsPerConnection: 50
+
+    - name: canary
+      labels:
+        version: canary
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
+        outlierDetection:
+          consecutive5xxErrors: 3
+          interval: 15s
+          baseEjectionTime: 60s
+          maxEjectionPercent: 75
