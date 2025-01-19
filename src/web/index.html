@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="COREos - AI-first operating system for founders and businesses">
+  
+  <!-- Theme configuration -->
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-browsers" content="Chrome 90+, Firefox 88+, Safari 14+, Edge 90+">
+
+  <title>COREos</title>
+
+  <!-- Preload critical assets -->
+  <link rel="icon" type="image/svg+xml" href="/src/assets/icons/logo.svg">
+  <link rel="preload" href="/src/assets/fonts/SFPro-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/src/assets/fonts/SFPro-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/src/assets/fonts/SFPro-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+  <!-- Resource hints -->
+  <link rel="preconnect" href="https://api.coreos.ai" crossorigin="anonymous">
+
+  <!-- Cache control -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Security headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.coreos.ai wss://api.coreos.ai;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <!-- Development mode script -->
+  <script type="module">
+    import { injectIntoGlobalHook } from '/@vite/client';
+    injectIntoGlobalHook(window);
+    window.$RefreshReg$ = () => {};
+    window.$RefreshSig$ = () => (type) => type;
+  </script>
+</head>
+<body>
+  <!-- Skip to main content link for accessibility -->
+  <a href="#root" class="skip-link">Skip to main content</a>
+
+  <!-- Root element for React application -->
+  <div id="root" role="application" aria-label="COREos Application"></div>
+
+  <!-- Fallback for disabled JavaScript -->
+  <noscript>
+    <div style="padding: 20px; text-align: center;">
+      <h1>JavaScript Required</h1>
+      <p>You need to enable JavaScript to run COREos. Please enable JavaScript in your browser settings and reload the page.</p>
+    </div>
+  </noscript>
+
+  <!-- Application entry point -->
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- Browser version check -->
+  <script>
+    (function() {
+      const minVersions = {
+        chrome: 90,
+        firefox: 88,
+        safari: 14,
+        edge: 90
+      };
+
+      function getBrowserInfo() {
+        const ua = navigator.userAgent.toLowerCase();
+        let browser;
+        let version;
+
+        if (ua.includes('chrome')) {
+          browser = 'chrome';
+          version = parseInt(ua.split('chrome/')[1]);
+        } else if (ua.includes('firefox')) {
+          browser = 'firefox';
+          version = parseInt(ua.split('firefox/')[1]);
+        } else if (ua.includes('safari') && !ua.includes('chrome')) {
+          browser = 'safari';
+          version = parseInt(ua.split('version/')[1]);
+        } else if (ua.includes('edg')) {
+          browser = 'edge';
+          version = parseInt(ua.split('edg/')[1]);
+        }
+
+        return { browser, version };
+      }
+
+      const { browser, version } = getBrowserInfo();
+      if (browser && minVersions[browser] && version < minVersions[browser]) {
+        document.body.innerHTML = `
+          <div style="padding: 20px; text-align: center;">
+            <h1>Browser Update Required</h1>
+            <p>Your browser version is not supported. Please update to a newer version to use COREos.</p>
+            <p>Minimum supported versions: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+</p>
+          </div>
+        `;
+      }
+    })();
+  </script>
+</body>
+</html>
