@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        PYTHON_VERSION: "3.11"
+        POETRY_VERSION: "1.5.1"
+    image: coreos-backend
+    ports:
+      - "8000:8000"  # FastAPI
+      - "9090:9090"  # Metrics
+      - "5678:5678"  # Debug port
+    volumes:
+      - .:/app:delegated
+      - poetry_cache:/root/.cache/pypoetry:delegated
+      - ./tests:/app/tests:delegated
+    environment:
+      - ENV_STATE=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/coreos
+      - REDIS_URL=redis://cache:6379/0
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1
+      - DEBUGPY_ENABLE=1
+      - DEBUGPY_PORT=5678
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload --debug
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - coreos_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:14-alpine  # v14-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:delegated
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=coreos
+    networks:
+      - coreos_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  cache:
+    image: redis:7-alpine  # v7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data:delegated
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - coreos_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  poetry_cache:
+    driver: local
+
+networks:
+  coreos_network:
+    driver: bridge
+    attachable: true
+    internal: false
+    enable_ipv6: false
