@@ -31,7 +31,7 @@
     "crypto-js": "^4.1.1",
     "date-fns": "^2.30.0",
     "events": "^3.3.0",
-    "focus-trap-react": "10.0.0",
+    "focus-trap-react": "11.0.3",
     "framer-motion": "^6.0.0",
     "fuse.js": "^6.6.2",
     "fuzzysort": "2.0.1",
