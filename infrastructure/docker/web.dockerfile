@@ -5,7 +5,7 @@
 # nginx:1.25-alpine v1.25.2
 
 # ---- Build Stage ----
-FROM node:18-alpine AS builder
+FROM node:23-alpine AS builder
 LABEL stage=builder
 
 # Set build platform for multi-architecture support
