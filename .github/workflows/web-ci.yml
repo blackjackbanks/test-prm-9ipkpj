@@ -81,7 +81,7 @@ jobs:
           NODE_ENV: production
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: ${{ env.WORKING_DIRECTORY }}/dist
@@ -89,7 +89,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: ${{ env.WORKING_DIRECTORY }}/coverage
