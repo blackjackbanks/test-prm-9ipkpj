@@ -40,7 +40,7 @@ RUN cd dist && \
     find . -type f -regex '.*\.\(js\|css\|html\|svg\)$' -exec brotli -9 -k {} \;
 
 # ---- Production Stage ----
-FROM nginx:1.25-alpine
+FROM nginx:1.27-alpine
 LABEL maintainer="COREos Engineering <engineering@coreos.io>"
 
 # Create non-root user for security
