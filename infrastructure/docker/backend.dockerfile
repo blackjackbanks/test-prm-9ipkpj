@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM python:3.11-slim AS builder
+FROM python:3.13-slim AS builder
 
 # Set build environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
     && pip check
 
 # Stage 2: Production
-FROM python:3.11-alpine
+FROM python:3.13-alpine
 
 # Set production environment variables
 ENV PYTHONUNBUFFERED=1 \
